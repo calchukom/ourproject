@@ -1,0 +1,146 @@
+services:
+  # Backend API Service
+  - type: web
+    name: virtual-tourist-api
+    runtime: node
+    plan: standard
+    dir: backend # Set working directory to backend/
+    buildCommand: "pnpm install && pnpm run build" # Now runs from backend/
+    startCommand: "pnpm start" # Now runs from backend/
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "8000"
+      - key: CORS_ORIGIN
+        value: https://virtual-tourist.vercel.app
+        scope: build
+
+      # Database (Neon PostgreSQL)
+      - key: DATABASE_URL
+        sync: false # Set via Render dashboard from Neon
+        scope: build
+
+      # JWT Secrets
+      - key: JWT_SECRET
+        sync: false # Set via Render dashboard
+        scope: build
+      - key: JWT_REFRESH_SECRET
+        sync: false # Set via Render dashboard
+        scope: build
+
+      # OpenAI
+      - key: OPENAI_API_KEY
+        sync: false # Set via Render dashboard
+        scope: build
+      - key: OPENAI_MODEL
+        value: gpt-3.5-turbo
+
+      # Email Configuration (Gmail App Password)
+      - key: EMAIL_SENDER
+        sync: false # Set via Render dashboard
+        scope: build
+      - key: EMAIL_PASSWORD
+        sync: false # Set via Render dashboard (create App Password)
+        scope: build
+
+      # Cloudinary Image Hosting
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false # Set via Render dashboard
+        scope: build
+      - key: CLOUDINARY_API_KEY
+        sync: false # Set via Render dashboard
+        scope: build
+      - key: CLOUDINARY_API_SECRET
+        sync: false # Set via Render dashboard
+        scope: build
+
+      # Logging
+      - key: LOG_LEVEL
+        value: info
+
+    # ─────────────────────────────────────────────────────────────
+    # DEPLOYMENT HOOKS & HEALTH MONITORING
+    # ─────────────────────────────────────────────────────────────
+
+    # Pre-deploy: Run database migrations before service starts
+    preDeployCommand: "pnpm run db:migrate" # Working dir is already backend/
+
+    # Health check: Render pings this endpoint every 30 seconds
+    # If it fails 3x in a row, service is marked as unhealthy
+    healthCheckPath: /api/health
+
+    # Auto-deploy: Set to true to auto-deploy on code/config changes
+    # Set to false to deploy manually via dashboard
+    autoDeploy: true
+
+    # Build filters: Only trigger deploys when these paths change
+    # Prevents unnecessary rebuilds for doc or config-only changes
+    buildFilter:
+      paths:
+        - backend/**
+        - render.yaml
+      ignoredPaths:
+        - "*.md" # Skip docs (non-code changes)
+        - PRODUCTION_*.md
+        - DEPLOYMENT_*.md
+        - SECURITY_AUDIT.md
+        - START_HERE.md
+        - QUICK_START*.md
+        - API_DOCUMENTATION.md
+        - .gitignore
+        - .vscode/**
+
+    # ─────────────────────────────────────────────────────────────
+    # SCALING & PERSISTENCE
+    # ─────────────────────────────────────────────────────────────
+
+    # Disks for persistent data (survives service restarts)
+    disks:
+      - name: app-data
+        mountPath: /app/backend/data
+        sizeGB: 1
+
+    # Auto-scaling configuration
+    maxInstances: 2 # Max replicas during high traffic
+    minInstances: 1 # Minimum replicas (at least 1 always running)
+
+
+# ─────────────────────────────────────────────────────────────────
+# IMPORTANT SETUP INSTRUCTIONS
+# ─────────────────────────────────────────────────────────────────
+#
+# 1. Create a Neon PostgreSQL database:
+#    - Go to https://console.neon.tech
+#    - Create a new project and database
+#    - Copy the connection string (CONNECTION_POOL: true)
+#    - Set as DATABASE_URL in Render dashboard
+#
+# 2. Add JWT Secrets in Render dashboard:
+#    - JWT_SECRET: Generate with: `openssl rand -base64 32`
+#    - JWT_REFRESH_SECRET: Generate with: `openssl rand -base64 32`
+#
+# 3. Add OpenAI API Key:
+#    - Get from: https://platform.openai.com/api-keys
+#
+# 4. Setup Gmail for Email:
+#    - Enable 2FA on Gmail account
+#    - Create App Password: https://myaccount.google.com/apppasswords
+#    - Use email and app password (16 chars with spaces removed)
+#
+# 5. Setup Cloudinary for Image Hosting:
+#    - Create free account: https://cloudinary.com
+#    - Get Cloud Name, API Key, API Secret from dashboard
+#
+# 6. Deploy:
+#    - Connect your GitHub repo to Render
+#    - Select "Deploy using render.yaml"
+#    - Choose "backend" branch
+#    - Render will auto-deploy on push
+#
+# 7. Custom Domain (Optional):
+#    - Go to Render dashboard > Settings
+#    - Add custom domain
+#    - Update CORS_ORIGIN in frontend .env.production
+#
+#────────────────────────────────────────────────────────────────────
