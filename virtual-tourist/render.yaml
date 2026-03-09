@@ -4,9 +4,8 @@ services:
     name: virtual-tourist-api
     runtime: node
     plan: standard
-    dir: backend # Set working directory to backend/
-    buildCommand: "pnpm install && pnpm run build" # Now runs from backend/
-    startCommand: "pnpm start" # Now runs from backend/
+    buildCommand: "cd backend && pnpm install --frozen-lockfile && pnpm run build"
+    startCommand: "cd backend && pnpm start"
     envVars:
       - key: NODE_ENV
         value: production
@@ -64,7 +63,7 @@ services:
     # ─────────────────────────────────────────────────────────────
 
     # Pre-deploy: Run database migrations before service starts
-    preDeployCommand: "pnpm run db:migrate" # Working dir is already backend/
+    preDeployCommand: "cd backend && pnpm run db:migrate"
 
     # Health check: Render pings this endpoint every 30 seconds
     # If it fails 3x in a row, service is marked as unhealthy
