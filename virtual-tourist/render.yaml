@@ -4,8 +4,9 @@ services:
     name: virtual-tourist-api
     runtime: node
     plan: standard
-    buildCommand: "cd backend && pnpm install --frozen-lockfile && pnpm run build"
-    startCommand: "node backend/dist/server.js"
+    rootDir: backend
+    buildCommand: "pnpm install --frozen-lockfile && pnpm run build"
+    startCommand: "pnpm start"
     envVars:
       - key: NODE_ENV
         value: production
@@ -53,7 +54,7 @@ services:
     # ─────────────────────────────────────────────────────────────
 
     # Pre-deploy: Run database migrations before service starts
-    preDeployCommand: "cd backend && npx tsx src/drizzle/migrate.ts"
+    preDeployCommand: "pnpm run db:migrate"
 
     # Health check: Render pings this endpoint every 30 seconds
     # If it fails 3x in a row, service is marked as unhealthy
