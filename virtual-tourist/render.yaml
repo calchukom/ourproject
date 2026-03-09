@@ -13,46 +13,36 @@ services:
         value: "8000"
       - key: CORS_ORIGIN
         value: https://virtual-tourist.vercel.app
-        scope: build
 
       # Database (Neon PostgreSQL)
       - key: DATABASE_URL
         sync: false # Set via Render dashboard from Neon
-        scope: build
 
       # JWT Secrets
       - key: JWT_SECRET
         sync: false # Set via Render dashboard
-        scope: build
       - key: JWT_REFRESH_SECRET
         sync: false # Set via Render dashboard
-        scope: build
 
       # OpenAI
       - key: OPENAI_API_KEY
         sync: false # Set via Render dashboard
-        scope: build
       - key: OPENAI_MODEL
         value: gpt-3.5-turbo
 
       # Email Configuration (Gmail App Password)
       - key: EMAIL_SENDER
         sync: false # Set via Render dashboard
-        scope: build
       - key: EMAIL_PASSWORD
         sync: false # Set via Render dashboard (create App Password)
-        scope: build
 
       # Cloudinary Image Hosting
       - key: CLOUDINARY_CLOUD_NAME
         sync: false # Set via Render dashboard
-        scope: build
       - key: CLOUDINARY_API_KEY
         sync: false # Set via Render dashboard
-        scope: build
       - key: CLOUDINARY_API_SECRET
         sync: false # Set via Render dashboard
-        scope: build
 
       # Logging
       - key: LOG_LEVEL
@@ -90,20 +80,7 @@ services:
         - .gitignore
         - .vscode/**
 
-    # ─────────────────────────────────────────────────────────────
-    # SCALING & PERSISTENCE
-    # ─────────────────────────────────────────────────────────────
-
-    # Disks for persistent data (survives service restarts)
-    disks:
-      - name: app-data
-        mountPath: /app/backend/data
-        sizeGB: 1
-
-    # Auto-scaling configuration
-    maxInstances: 2 # Max replicas during high traffic
-    minInstances: 1 # Minimum replicas (at least 1 always running)
-
+    # ✅ Configuration is now Render Blueprint compliant
 
 # ─────────────────────────────────────────────────────────────────
 # IMPORTANT SETUP INSTRUCTIONS
